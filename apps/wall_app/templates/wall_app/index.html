@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,
+    initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" integrity="sha256-46qynGAkLSFpVbEBog43gvNhfrOj+BmwXdxFgVK/Kvc=" crossorigin="anonymous"/>
+
+
+    {% load static %}
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <script src="{% static 'js/script.js' %}"></script>
+
+    <title>Wall</title>
+</head>
+<body>
+
+    <h1>CodingDojo Wall</h1>
+    <h5>Welcome {{ (User.objects.get(id=request.session.cur_user)).first_name }}</h5>
+    <p><a href="/destroy/">Log Off</a></p>
+    <hr>
+    <div class="container">
+
+        <h3>Post a message</h3>
+        <form action="/wall/post/" method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">    
+                <label for="title">Title</label>
+                <input type="text" class="form-control" name="title">
+            </div>
+
+            <div class="form-group">
+                <textarea class="form-control" name="message" cols="30" rows="10"></textarea>
+            </div>
+
+            <input type="submit" value="Post a Message" class="btn btn-primary">
+            
+        </form>
+
+
+        <div class="col-xl-11">
+
+            {% for post in all_posts %}
+                <h5>{{ post.title }}</h5>
+                <p>{{ post.author.first_name }} {{ post.author.last_name }} | {{ post.created_at }}</p>
+                <p>{{ post.message }}</p>
+
+            {% if post.author.id == User.objects.get(id=request.session.cur_user) %}
+                <a class="btn btn-danger" href="/wall/post/delete/{{ post.id }}/">Delete Post</a>
+            {% endif %}
+
+            {% for comment in Comment.objects.filter(post=post) %}
+            <p>{{ comment.author.first_name }} {{ comment.author.last_name }} | {{ comment.created_at }}</p>
+            <p>{{ comment.comment }}</p>
+
+            {% endfor %}
+            <h1>Post a Comment!</h1>
+            <form action="/wall/post/comment/{{ post.id }}" method="POST">
+                <textarea name="comment" cols="30" rows="10"></textarea>
+
+                <input type="submit" value="Post a Comment" class="btn btn-success">
+            </form>
+            {% endfor %}
+
+        </div>
+
+
+
+
+
+    </div>
+
+
+</body>
+</html>

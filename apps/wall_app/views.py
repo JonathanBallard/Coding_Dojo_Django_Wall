@@ -8,3 +8,40 @@ from .models import *
 # Create your views here. 
 def index(request): 
     return render(request, 'wall_app/index.html') 
+
+def post(request):
+    errors = Post.objects.post_validator(request.POST)
+    if len(errors) > 0:
+        for k, v in errors.items():
+            messages.error(request, v)
+            return redirect('/wall/')
+    else:
+        thisUser = User.objects.get(id=request.session['cur_user'])
+        newPost = Post.objects.new_post(request.POST, thisUser)
+        return redirect('/wall/')
+
+
+
+def deletePost(request, id):
+    delPost = Post.objects.get(id = id)
+    if delPost.author.id == request.session['cur_user']:
+        delPost.delete()
+    else:
+        return redirect('/wall/')
+
+def commentPost(request, id):
+    errors = Comment.objects.comment_validator(request.POST)
+    if len(errors) > 0:
+        for k,v in errors.items():
+            messages.error(request, v)
+            return redirect('/wall/')
+    else:
+        thisUser = User.objects.get(id = request.session['cur_user'])
+        thisPost = Post.objects.get(id=id)
+        Comment.objects.new_comment(request.POST, thisUser, thisPost)
+        return redirect('/')
+
+
+def destroy(request):
+    request.session.flush()
+    return redirect('/')

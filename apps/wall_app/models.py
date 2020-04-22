@@ -18,6 +18,9 @@ class PostManager(models.Manager):
             errors['message'] = "Message must be at least 10 characters long"
         return errors
     
+    def new_post(self, postData, author):
+        thisPost = Post.objects.create(title=postData['title'], message=postData['message'], author=author)
+        return thisPost
 
 
 
@@ -38,6 +41,10 @@ class CommentManager(models.Manager):
         if len(postData['comment']) < 5:
             errors['comment'] = "Comment must be at least 5 characters long"
         return errors
+    
+    def new_comment(self, postData, author, post):
+        thisComment = Comment.objects.create(comment=postData['comment'], author=author, post=post)
+        return thisComment
 
 
 class Comment(models.Model):
