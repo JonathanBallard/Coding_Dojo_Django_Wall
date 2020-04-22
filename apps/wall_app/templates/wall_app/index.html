@@ -27,7 +27,7 @@
 <body>
 
     <h1>CodingDojo Wall</h1>
-    <h5>Welcome {{ (User.objects.get(id=request.session.cur_user)).first_name }}</h5>
+    <h5>Welcome {{ user.first_name }} {{ user.last_name }}</h5>
     <p><a href="/destroy/">Log Off</a></p>
     <hr>
     <div class="container">
@@ -53,25 +53,32 @@
         <div class="col-xl-11">
 
             {% for post in all_posts %}
-                <h5>{{ post.title }}</h5>
+            <div class="my-2 bg-light text-dark">
+
+                <h5 class="mt-5">{{ post.title }}</h5>
                 <p>{{ post.author.first_name }} {{ post.author.last_name }} | {{ post.created_at }}</p>
                 <p>{{ post.message }}</p>
-
-            {% if post.author.id == User.objects.get(id=request.session.cur_user) %}
+                
+                {% if post.author.id == user.id %}
                 <a class="btn btn-danger" href="/wall/post/delete/{{ post.id }}/">Delete Post</a>
-            {% endif %}
-
-            {% for comment in Comment.objects.filter(post=post) %}
-            <p>{{ comment.author.first_name }} {{ comment.author.last_name }} | {{ comment.created_at }}</p>
-            <p>{{ comment.comment }}</p>
-
-            {% endfor %}
-            <h1>Post a Comment!</h1>
-            <form action="/wall/post/comment/{{ post.id }}" method="POST">
-                <textarea name="comment" cols="30" rows="10"></textarea>
-
-                <input type="submit" value="Post a Comment" class="btn btn-success">
-            </form>
+                {% endif %}
+                
+                {% for comment in all_comments %}
+                {% if comment.post.id == post.id %}
+                <div class="my-3 bg-secondary text-light">
+                    <p>{{ comment.author.first_name }} {{ comment.author.last_name }} | {{ comment.created_at }}</p>
+                    <p>{{ comment.comment }}</p>
+                </div>
+                {% endif %}
+                {% endfor %}
+                <h1>Post a Comment!</h1>
+                <form action="/wall/post/comment/{{ post.id }}/" method="POST">
+                    {% csrf_token %}
+                    <textarea name="comment" cols="30" rows="10"></textarea>
+                    
+                    <input type="submit" value="Post a Comment" class="btn btn-success mb-5">
+                </form>
+            </div>
             {% endfor %}
 
         </div>

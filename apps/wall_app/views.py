@@ -7,7 +7,17 @@ from .models import *
  
 # Create your views here. 
 def index(request): 
-    return render(request, 'wall_app/index.html') 
+
+    thisUser = User.objects.get(id = request.session['cur_user'])
+    allPosts = Post.objects.all()
+    allComments = Comment.objects.all()
+    context = {
+        "user" : thisUser,
+        "all_posts" : allPosts,
+        "all_comments" : allComments,
+    }
+
+    return render(request, 'wall_app/index.html', context) 
 
 def post(request):
     errors = Post.objects.post_validator(request.POST)
@@ -26,8 +36,7 @@ def deletePost(request, id):
     delPost = Post.objects.get(id = id)
     if delPost.author.id == request.session['cur_user']:
         delPost.delete()
-    else:
-        return redirect('/wall/')
+    return redirect('/wall/')
 
 def commentPost(request, id):
     errors = Comment.objects.comment_validator(request.POST)
@@ -39,7 +48,7 @@ def commentPost(request, id):
         thisUser = User.objects.get(id = request.session['cur_user'])
         thisPost = Post.objects.get(id=id)
         Comment.objects.new_comment(request.POST, thisUser, thisPost)
-        return redirect('/')
+        return redirect('/wall/')
 
 
 def destroy(request):
